@@ -60,6 +60,9 @@ class PreDataset(data.Dataset):
         self.ave_len = 0
         csv_data = pd.read_csv(target_dir, encoding='utf-8')
         for i, line in csv_data.iterrows():
+            if bool(re.search(re.compile(r'no response'), line['sentence'].lower())):
+                # print(line['sentence'])
+                continue
             sentence = [''.join(re.findall(re.compile('\w'), word))
                         for word in line['sentence'].lower().split(' ')
                         if word != '' and word != 'á']

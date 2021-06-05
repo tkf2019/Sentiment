@@ -61,7 +61,7 @@ def init_argparser():
                         type=int, default=64,
                         help='batch size')
     parser.add_argument('--padlen',
-                        type=int, default=256,
+                        type=int, default=128,
                         help='max length of a sentence embedding')
     parser.add_argument('--mincount',
                         type=int, default=1,
@@ -281,7 +281,7 @@ if __name__ == '__main__':
         test(model, test_data_loader)
 
         # generate state transformation image as visual model
-        g = make_dot(model(Variable(torch.rand(1, 256, 300).cuda()), Variable(torch.tensor([256]).cuda())),
+        g = make_dot(model(torch.zeros(1, 128, 300).cuda(), torch.tensor([1]).cuda()),
                      params=dict(model.named_parameters()))
         g.render('../asset/{}_model'.format(options.model),
                  view=False, format='png')

@@ -37,7 +37,7 @@ class CNN(nn.Module):
     def forward(self, x, _):
         """
         Args:
-            x (tensor): batch input with tensor [bs * padding length * size of word vector]
+            x (tensor): batch input with tensor [batch size * padding length * size of word vector]
         """
         # print(x.size(), x.shape)
         out = x.unsqueeze(1)
@@ -78,7 +78,7 @@ class RNN(nn.Module):
     def forward(self, x, x_len):
         """
         Args: 
-            x (tensor): batch input with tensor [bs * padding length * size of word vector]
+            x (tensor): batch input with tensor [batch size * padding length * size of word vector]
             x_len (int): original length of input sentence before cutting off
         """
         # print(x.size(), x.shape)
@@ -118,7 +118,7 @@ class MLP(nn.Module):
     def forward(self, x, _):
         """
         Args: 
-            x (tensor): batch input with tensor [bs * padding length * size of word vector]
+            x (tensor): batch input with tensor [batch size * padding length * size of word vector]
         """
         # print(x.size(), x.shape)
         out = x.view(x.shape[0], -1)
