@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-from torch.autograd import Variable
 import torch.nn.functional as F
 
 
@@ -34,7 +33,7 @@ class CNN(nn.Module):
         x = F.max_pool1d(x, x.size(2)).squeeze(2)
         return x
 
-    def forward(self, x, _):
+    def forward(self, x):
         """
         Args:
             x (tensor): batch input with tensor [batch size * padding length * size of word vector]
@@ -75,21 +74,14 @@ class RNN(nn.Module):
                             dropout=self.dropou_rate)
         self.fc = nn.Linear(self.hidden_size * 4, self.num_classes)
 
-    def forward(self, x, x_len):
+    def forward(self, x):
         """
         Args: 
             x (tensor): batch input with tensor [batch size * padding length * size of word vector]
             x_len (int): original length of input sentence before cutting off
         """
-        # print(x.size(), x.shape)
-        _, idx_sort = torch.sort(x_len, dim=0, descending=True)
-        _, idx_unsort = torch.sort(idx_sort, dim=0)
-        x = x.index_select(0, Variable(idx_sort))
-        x = nn.utils.rnn.pack_padded_sequence(x, lengths=list(x_len[idx_sort]),
-                                              batch_first=True, enforce_sorted=False)
         _, (hn, _) = self.lstm(x)
         hn = hn.permute(1, 0, 2)
-        hn = hn.index_select(0, Variable(idx_unsort))
         hn = hn.reshape(hn.shape[0], -1)
         out = self.fc(hn)
         return out
@@ -115,7 +107,7 @@ class MLP(nn.Module):
         self.sigmoid = nn.Sigmoid()
         self.fc2 = nn.Linear(self.hidden_size, self.num_classes)
 
-    def forward(self, x, _):
+    def forward(self, x):
         """
         Args: 
             x (tensor): batch input with tensor [batch size * padding length * size of word vector]
