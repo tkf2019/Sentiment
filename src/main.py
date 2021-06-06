@@ -135,12 +135,11 @@ def train(
         model.train()
         loss_sum = 0
         loss_list = []
-        for _, (input_list, input_len, label) in tqdm(enumerate(data)):
+        for _, (input_list, label) in tqdm(enumerate(data)):
             optimizer.zero_grad()
             input_list = Variable(input_list.cuda())
-            input_len = Variable(input_len.cuda())
             label = Variable(label.cuda())
-            output = model(input_list, input_len)
+            output = model(input_list)
             loss = criterion(input=output, target=label)
             loss_sum += loss.item()
             loss_list.append(loss.item())
@@ -154,11 +153,10 @@ def train(
     def valid_base(data: DataLoader, epoch: int) -> list:
         model.eval()
         loss_list = []
-        for _, (input_list, input_len, label) in tqdm(enumerate(data)):
+        for _, (input_list, label) in tqdm(enumerate(data)):
             input_list = Variable(input_list.cuda())
-            input_len = Variable(input_len.cuda())
             label = Variable(label.cuda())
-            output = model(input_list, input_len)
+            output = model(input_list)
             loss = criterion(input=output, target=label)
             loss_list.append(loss.item())
         return loss_list
@@ -191,11 +189,10 @@ def test(model: nn.Module, data: DataLoader) -> float:
     output_list = []
     target_list = []
     with torch.no_grad():
-        for i, (input_list, input_len, label) in tqdm(enumerate(data)):
+        for i, (input_list, label) in tqdm(enumerate(data)):
             input_list = Variable(input_list.cuda())
-            input_len = Variable(input_len.cuda())
             label = Variable(label.cuda())
-            output = model(input_list, input_len)
+            output = model(input_list)
             output = torch.max(output, 1)[1]
             output_list.extend(np.array(output.cpu()))
             target_list.extend(np.array(label.cpu()))
@@ -251,11 +248,11 @@ if __name__ == '__main__':
         print("Valid Data: {}".format(len(valid_data)))
 
         _, stop, train_loss, valid_loss = train(model=model,
-                                          train_data=train_data_loader,
-                                          valid_data=valid_data_loader,
-                                          epoch=options.epoch,
-                                          patience=options.patience,
-                                          path='../models/{}_model.pt'.format(options.model))
+                                                train_data=train_data_loader,
+                                                valid_data=valid_data_loader,
+                                                epoch=options.epoch,
+                                                patience=options.patience,
+                                                path='../models/{}_model.pt'.format(options.model))
         # plot loss changing curve
         plt.plot([epoch for epoch in range(1, stop + 1)],
                  train_loss, label='Train Loss')
@@ -263,7 +260,7 @@ if __name__ == '__main__':
                  valid_loss, label='Valid Loss')
         plt.legend()
         plt.savefig('../asset/{}_loss.png'.format(options.model), format='png')
-        
+
     elif options.mode == 'test':
         test_data = PreDataset(pre_train=pre_train_data,
                                target_dir='../isear/isear_test.csv',
@@ -281,7 +278,7 @@ if __name__ == '__main__':
         test(model, test_data_loader)
 
         # generate state transformation image as visual model
-        g = make_dot(model(torch.zeros(1, 128, 300).cuda(), torch.tensor([1]).cuda()),
+        g = make_dot(model(torch.zeros(1, 128, 300).cuda()),
                      params=dict(model.named_parameters()))
         g.render('../asset/{}_model'.format(options.model),
                  view=False, format='png')

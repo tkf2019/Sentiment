@@ -59,9 +59,8 @@ class PreDataset(data.Dataset):
         self.fq = np.zeros(CLASS, np.int32)
         self.ave_len = 0
         csv_data = pd.read_csv(target_dir, encoding='utf-8')
-        for i, line in csv_data.iterrows():
+        for _, line in csv_data.iterrows():
             if bool(re.search(re.compile(r'no response'), line['sentence'].lower())):
-                # print(line['sentence'])
                 continue
             sentence = [''.join(re.findall(re.compile('\w'), word))
                         for word in line['sentence'].lower().split(' ')
@@ -82,13 +81,9 @@ class PreDataset(data.Dataset):
                 input_list.append(np.zeros(self.model.vector_size, np.float32))
         if len(input_list) > self.pad_len:
             input_list = input_list[:self.pad_len]
-        input_list_len = len(input_list)
         input_list = torch.cat([torch.FloatTensor(input_list), torch.FloatTensor(
             [np.zeros(self.model.vector_size, np.float32)] * (self.pad_len - len(input_list)))])
-        # input_list = F.pad(input=torch.tensor(input_list),
-        #                    pad=(0, 0, 0, self.pad_len - input_list_len),
-        #                    mode='constant', value=0)
-        return input_list, input_list_len, label
+        return input_list, label
 
     def __len__(self):
         return len(self.list)

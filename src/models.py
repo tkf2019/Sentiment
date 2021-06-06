@@ -104,8 +104,8 @@ class MLP(nn.Module):
 
         self.dropout = nn.Dropout(self.dropout_rate)
         self.fc1 = nn.Linear(input_size * pad_len, self.hidden_size)
-        self.sigmoid = nn.Sigmoid()
         self.fc2 = nn.Linear(self.hidden_size, self.num_classes)
+        self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
         """
@@ -115,7 +115,6 @@ class MLP(nn.Module):
         # print(x.size(), x.shape)
         out = x.view(x.shape[0], -1)
         out = self.dropout(out)
-        out = self.fc1(out)
-        out = self.sigmoid(out)
+        out = self.sigmoid(self.fc1(out))
         out = self.fc2(out)
         return out
